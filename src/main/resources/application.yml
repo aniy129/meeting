@@ -1,0 +1,17 @@
+spring:
+  #thymeleaf 配置
+  thymeleaf:
+    servlet:
+      content-type: text/html
+    cache: false
+    mode: HTML
+    encoding: UTF-8
+    prefix: classpath:/templates/
+    suffix: .html
+
+  resources:
+    static-locations: classpath:/static/,file:static
+
+  profiles:
+    active: dev
+
