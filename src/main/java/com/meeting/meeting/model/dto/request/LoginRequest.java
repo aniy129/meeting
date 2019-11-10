@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 @ApiModel(value = "登陆实体")
 @Data
-public class ManagerLogin implements Serializable {
+public class LoginRequest implements Serializable {
     @ApiModelProperty("用户名")
     private String userName;
     @ApiModelProperty("密码")

@@ -1,7 +1,7 @@
 package com.meeting.meeting.service.impl;
 
 import com.meeting.meeting.model.dbo.Manager;
-import com.meeting.meeting.model.dto.request.ManagerLogin;
+import com.meeting.meeting.model.dto.request.LoginRequest;
 import com.meeting.meeting.model.dto.response.ManagerLoginResult;
 import com.meeting.meeting.repository.ManagerRepository;
 import com.meeting.meeting.service.ManagerService;
@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
+import java.util.UUID;
 
 @Service
 public class ManagerServiceImpl implements ManagerService {
@@ -17,7 +18,7 @@ public class ManagerServiceImpl implements ManagerService {
     private ManagerRepository managerRepository;
 
     @Override
-    public ManagerLoginResult login(ManagerLogin login) {
+    public ManagerLoginResult login(LoginRequest login) {
         ManagerLoginResult result = new ManagerLoginResult();
         Manager manager = managerRepository.getManagerByAccount(login.getUserName());
         if (manager == null) {
@@ -28,7 +29,7 @@ public class ManagerServiceImpl implements ManagerService {
                 result.setAuth(DigestUtils.md5DigestAsHex(manager.getAccount().getBytes()));
                 result.setStatus("200");
                 result.setMessage("登陆成功");
-                String authorization = DigestUtils.md5DigestAsHex(("manager" + manager.getAccount() + manager.getPassword() + manager.getId()).getBytes());
+                String authorization = "manager" + UUID.randomUUID().toString();
                 result.setAuth(authorization);
                 CacheHelper.setData(authorization, manager);
             } else {

@@ -1,6 +1,6 @@
 package com.meeting.meeting.controller.api.manager;
 
-import com.meeting.meeting.model.dto.request.ManagerLogin;
+import com.meeting.meeting.model.dto.request.LoginRequest;
 import com.meeting.meeting.model.dto.response.ManagerLoginResult;
 import com.meeting.meeting.service.ManagerService;
 import io.swagger.annotations.Api;
@@ -21,7 +21,7 @@ public class ManagerLoginController {
 
     @PostMapping("/login")
     @ApiOperation(value = "登陆", response = ManagerLoginResult.class)
-    public ManagerLoginResult login(ManagerLogin login) {
+    public ManagerLoginResult login(LoginRequest login) {
         return managerService.login(login);
     }
 }

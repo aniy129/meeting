@@ -12,6 +12,9 @@ public class WebConfig implements WebMvcConfigurer {
     @Resource
     private ManagerLoginIntercept managerLoginIntercept;
 
+    @Resource
+    private UserLoginIntercept userLoginIntercept;
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(managerLoginIntercept)
@@ -27,5 +30,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "/html/**",
                         "/manager/login"
                 );
+        registry.addInterceptor(userLoginIntercept)
+                .addPathPatterns("/user/**")
+                .excludePathPatterns("/user/login");
     }
 }

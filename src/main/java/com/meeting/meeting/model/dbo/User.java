@@ -11,7 +11,7 @@ import java.io.Serializable;
 @Entity
 @Data
 @Table(name="user")
-public class UserInfo implements Serializable {
+public class User implements Serializable {
 
     /**
      * 主键，自增
