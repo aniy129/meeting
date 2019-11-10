@@ -1,4 +1,4 @@
-package com.meeting.meeting.controller.api;
+package com.meeting.meeting.controller.api.manager;
 
 import com.meeting.meeting.model.dto.request.ManagerLogin;
 import com.meeting.meeting.model.dto.response.ManagerLoginResult;

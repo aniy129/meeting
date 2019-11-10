@@ -34,8 +34,8 @@ public class SwaggerConfig {
         ticketPar.name("Authorization").description("token")
                 .modelRef(new ModelRef("string"))
                 .parameterType("header")
-                .defaultValue("Bearer ")
-                .required(true)
+//                .defaultValue("Bearer ")
+                .required(false)
                 .build();
         pars.add(ticketPar.build());
         return new Docket(DocumentationType.SWAGGER_2)
