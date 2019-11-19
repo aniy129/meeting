@@ -6,6 +6,7 @@ import com.meeting.meeting.service.ManagerService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,7 +22,7 @@ public class ManagerLoginController {
 
     @PostMapping("/login")
     @ApiOperation(value = "登陆", response = ManagerLoginResult.class)
-    public ManagerLoginResult login(LoginRequest login) {
+    public ManagerLoginResult login(@RequestBody LoginRequest login) {
         return managerService.login(login);
     }
 }
