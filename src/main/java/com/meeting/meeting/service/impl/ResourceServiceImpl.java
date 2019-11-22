@@ -6,9 +6,10 @@ import com.meeting.meeting.model.dto.request.ResourceRequest;
 import com.meeting.meeting.repository.ResourceRepository;
 import com.meeting.meeting.service.ResourceService;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.querydsl.QPageRequest;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class ResourceServiceImpl implements ResourceService {
@@ -17,8 +18,9 @@ public class ResourceServiceImpl implements ResourceService {
     private ResourceRepository resourceRepository;
 
     @Override
-    public List<Resource> getResourceList() {
-        return resourceRepository.findAll();
+    public Page<Resource> getResourceList(Integer pageSize,Integer pageIndex) {
+        PageRequest pageRequest = PageRequest.of(pageIndex, pageSize);
+        return resourceRepository.findAll(pageRequest);
     }
 
     @Override
