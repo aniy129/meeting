@@ -18,8 +18,8 @@ public class ResourceServiceImpl implements ResourceService {
     private ResourceRepository resourceRepository;
 
     @Override
-    public Page<Resource> getResourceList(Integer pageSize,Integer pageIndex) {
-        PageRequest pageRequest = PageRequest.of(pageIndex, pageSize);
+    public Page<Resource> getResourceList(Integer pageSize, Integer pageIndex) {
+        PageRequest pageRequest = PageRequest.of(pageIndex - 1, pageSize);
         return resourceRepository.findAll(pageRequest);
     }
 
