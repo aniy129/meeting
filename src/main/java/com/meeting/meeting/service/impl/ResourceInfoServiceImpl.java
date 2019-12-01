@@ -39,6 +39,9 @@ public class ResourceInfoServiceImpl implements ResourceInfoService {
         if (request.getState() != null) {
             query.setState(request.getState());
         }
+        if (request.getType() != null) {
+            query.setType(request.getType());
+        }
         Example<ResourceInfo> example = Example.of(query);
         return resourceInfoRepository.findAll(example, page);
     }

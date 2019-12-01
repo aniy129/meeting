@@ -13,4 +13,7 @@ public class ResourceInfoRequest extends Page {
     private Integer state;
     @ApiModelProperty(name = "manager", value = "资源的联系人姓名")
     private String manager;
+    @ApiModelProperty(name = "type", value = "资源类型")
+    private Integer type;
+
 }
