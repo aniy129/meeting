@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 @RestController
-@Api(tags = "会议资源管理控制器")
+@Api(tags = "资源类型管理控制器")
 @RequestMapping("/manager/meeting")
 public class MeetingResourceController {
 

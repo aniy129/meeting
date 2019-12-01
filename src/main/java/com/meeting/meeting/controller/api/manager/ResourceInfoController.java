@@ -17,7 +17,7 @@ import javax.annotation.Resource;
 import javax.validation.Valid;
 
 @RestController
-@Api(tags = "会议资源信息控制器")
+@Api(tags = "资源信息控制器")
 @RequestMapping("/manager/resourceInfo")
 public class ResourceInfoController {
     @Resource
