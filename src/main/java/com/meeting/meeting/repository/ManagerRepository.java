@@ -11,4 +11,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 */
 public interface ManagerRepository extends JpaRepository<Manager, Integer>, JpaSpecificationExecutor {
     Manager getManagerByAccount(String userName);
+
+    Manager getManagerByCode(String code);
 }

@@ -74,4 +74,10 @@ public class Manager implements Serializable {
      */
     @Column(name = "photo")
     private String photo;
+    /**
+     * 是否可用
+     */
+    @Column(name = "available")
+    private Boolean available;
+
 }
