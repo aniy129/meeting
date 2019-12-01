@@ -2,6 +2,8 @@ package com.meeting.meeting.service.impl;
 
 import com.meeting.meeting.model.dbo.User;
 import com.meeting.meeting.model.dto.request.LoginRequest;
+import com.meeting.meeting.model.dto.request.UserRegisterRequest;
+import com.meeting.meeting.model.dto.response.BaseResponse;
 import com.meeting.meeting.model.dto.response.UserLoginResult;
 import com.meeting.meeting.repository.UserRepository;
 import com.meeting.meeting.service.UserService;
@@ -40,5 +42,19 @@ public class UserServiceImpl implements UserService {
             }
         }
         return result;
+    }
+
+    @Override
+    public BaseResponse register(UserRegisterRequest request) {
+        User account = userRepository.getUserByNickname(request.getNickname());
+        if (account != null) {
+            return BaseResponse.failure("账号已存在!");
+        }
+        User user = new User();
+        BeanUtils.copyProperties(request, user);
+        user.setPassword(DigestUtils.md5DigestAsHex(user.getPassword().getBytes()));
+        user.setIdentity(1);
+        userRepository.save(user);
+        return BaseResponse.success(null);
     }
 }

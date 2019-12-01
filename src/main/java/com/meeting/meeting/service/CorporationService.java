@@ -2,6 +2,8 @@ package com.meeting.meeting.service;
 
 
 import com.meeting.meeting.model.dbo.Corporation;
+import com.meeting.meeting.model.dto.request.EnterpriseRegisterRequest;
+import com.meeting.meeting.model.dto.response.BaseResponse;
 
 /**
  * @author jie
@@ -38,4 +40,6 @@ public interface CorporationService {
      * @param id
      */
     void delete(Integer id);
+
+    BaseResponse register(EnterpriseRegisterRequest request);
 }

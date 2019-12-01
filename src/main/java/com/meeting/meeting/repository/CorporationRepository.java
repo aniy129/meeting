@@ -9,4 +9,5 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 * @date 2019-11-03
 */
 public interface CorporationRepository extends JpaRepository<Corporation, Integer>, JpaSpecificationExecutor {
+    Corporation getCorporationByName(String name);
 }

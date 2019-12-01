@@ -10,7 +10,7 @@ spring:
     suffix: .html
 
   resources:
-    static-locations: classpath:/static/,file:static
+    static-locations: classpath:/static/,file:static/
 
   profiles:
     active: dev

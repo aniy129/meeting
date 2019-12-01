@@ -62,4 +62,10 @@ public class User implements Serializable {
      */
     @Column(name = "email")
     private String email;
+
+    /**
+     * 企业Id
+     */
+    @Column(name = "cor_id")
+    private Integer CorId;
 }
