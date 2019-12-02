@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.RequestContext;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -22,7 +24,7 @@ public class UploadController {
 
     @PostMapping("/upload")
     @ApiOperation("上传")
-    public BaseResponse<String> upload(MultipartFile file) throws IOException {
+    public BaseResponse<String> upload(MultipartFile file, HttpServletRequest requestContext) throws IOException {
         if (file.isEmpty() || file.getSize() < 1) {
             return BaseResponse.failure("文件不存在");
         }
@@ -36,6 +38,6 @@ public class UploadController {
         }
         String fileName = String.format("%s.%s", UUID.randomUUID().toString(), Objects.requireNonNull(file.getOriginalFilename()).substring(file.getOriginalFilename().lastIndexOf(".") + 1));
         file.transferTo(new File(upload, fileName));
-        return BaseResponse.success("上传成功", "/upload/" + fileName);
+        return BaseResponse.success("上传成功", requestContext.getRequestURL().toString().replace("/common/upload","")+ "/upload/" + fileName);
     }
 }
