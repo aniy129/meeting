@@ -8,7 +8,6 @@ import com.meeting.meeting.service.ResourceService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.querydsl.QPageRequest;
 import org.springframework.stereotype.Service;
 
 @Service

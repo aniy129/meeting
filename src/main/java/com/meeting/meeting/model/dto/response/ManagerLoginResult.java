@@ -16,4 +16,8 @@ public class ManagerLoginResult implements Serializable {
     private String status;
     @ApiModelProperty(value = "登陆鉴权")
     private String auth;
+    @ApiModelProperty(value = "用户名")
+    private String name;
+    @ApiModelProperty(value = "账号")
+    private String account;
 }

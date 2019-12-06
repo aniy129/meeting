@@ -41,6 +41,8 @@ public class ManagerServiceImpl implements ManagerService {
                 result.setMessage("登陆成功");
                 String authorization = "manager" + UUID.randomUUID().toString();
                 result.setAuth(authorization);
+                result.setName(manager.getName());
+                result.setAccount(manager.getAccount());
                 CacheHelper.setData(authorization, manager);
             } else {
                 result.setStatus("400");
