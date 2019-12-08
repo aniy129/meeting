@@ -1,5 +1,6 @@
 package com.meeting.meeting.model.dto.response;
 
+import com.meeting.meeting.model.dbo.Corporation;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -54,4 +55,7 @@ public class UserLoginResult {
      */
     @ApiModelProperty(value = "用户邮箱")
     private String email;
+
+    @ApiModelProperty(value = "企业信息，仅当是企业用户时返回")
+    private Corporation corporation;
 }

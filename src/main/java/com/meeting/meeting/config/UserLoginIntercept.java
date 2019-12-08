@@ -1,6 +1,8 @@
 package com.meeting.meeting.config;
 
+import com.meeting.meeting.model.common.UserContext;
 import com.meeting.meeting.model.dto.response.BaseResponse;
+import com.meeting.meeting.model.dto.response.UserLoginResult;
 import com.meeting.meeting.util.CacheHelper;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -26,8 +28,13 @@ public class UserLoginIntercept implements HandlerInterceptor {
             response.getWriter().println(failure.toString());
             return false;
         } else {
+            UserContext.setUser((UserLoginResult) data);
             return true;
         }
     }
 
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        UserContext.removeUser();
+    }
 }

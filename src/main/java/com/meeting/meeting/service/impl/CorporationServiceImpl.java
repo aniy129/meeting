@@ -1,16 +1,26 @@
 package com.meeting.meeting.service.impl;
 
 
+import com.meeting.meeting.model.common.UserContext;
 import com.meeting.meeting.model.dbo.Corporation;
 import com.meeting.meeting.model.dbo.User;
+import com.meeting.meeting.model.dto.request.CorporationListRequest;
+import com.meeting.meeting.model.dto.request.EditCorporationRequest;
 import com.meeting.meeting.model.dto.request.EnterpriseRegisterRequest;
+import com.meeting.meeting.model.dto.request.ManagerEditCorporationRequest;
 import com.meeting.meeting.model.dto.response.BaseResponse;
+import com.meeting.meeting.model.dto.response.UserLoginResult;
 import com.meeting.meeting.repository.CorporationRepository;
 import com.meeting.meeting.repository.UserRepository;
 import com.meeting.meeting.service.CorporationService;
+import com.meeting.meeting.util.StringUtils;
 import com.meeting.meeting.util.ValidationUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -88,6 +98,50 @@ public class CorporationServiceImpl implements CorporationService {
         cp = corporationRepository.saveAndFlush(cp);
         user.setCorId(cp.getId());
         userRepository.save(user);
+        return BaseResponse.success(null);
+    }
+
+    @Override
+    public BaseResponse editCorporation(EditCorporationRequest request) {
+        UserLoginResult user = UserContext.getUser();
+        if (user.getIdentity().equals(0)) {
+            Corporation corporationByName = corporationRepository.getCorporationByName(request.getName());
+            if (corporationByName != null && !corporationByName.getName().equals(user.getCorporation().getName())) {
+                return BaseResponse.failure("企业名称已存在!");
+            } else {
+                BeanUtils.copyProperties(request, user.getCorporation());
+                corporationRepository.save(user.getCorporation());
+                return BaseResponse.success(null);
+            }
+        } else {
+            return BaseResponse.failure("非企业管理员不能修改!");
+        }
+    }
+
+    @Override
+    public Page<Corporation> list(CorporationListRequest request) {
+        PageRequest page = PageRequest.of(request.getPageIndex() - 1, request.getPageSize());
+        Corporation query = new Corporation();
+        if (StringUtils.isNotBlank(request.getName())) {
+            query.setName(request.getName());
+        }
+        ExampleMatcher matcher = ExampleMatcher.matching().withMatcher("name", ExampleMatcher.GenericPropertyMatchers.contains());
+        Example<Corporation> example = Example.of(query, matcher);
+        return corporationRepository.findAll(example, page);
+    }
+
+    @Override
+    public BaseResponse edit(ManagerEditCorporationRequest request) {
+        Corporation corporation = findById(request.getId());
+        if (corporation == null) {
+            return BaseResponse.failure("企业不存在");
+        }
+        Corporation corporationByName = corporationRepository.getCorporationByName(request.getName());
+        if (corporationByName != null && !corporationByName.getName().equals(request.getName())) {
+            return BaseResponse.failure("企业名称已存在!");
+        }
+        BeanUtils.copyProperties(request, corporation);
+        corporationRepository.save(corporation);
         return BaseResponse.success(null);
     }
 }

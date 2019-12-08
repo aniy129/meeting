@@ -1,10 +1,12 @@
 package com.meeting.meeting.service.impl;
 
+import com.meeting.meeting.model.dbo.Corporation;
 import com.meeting.meeting.model.dbo.User;
 import com.meeting.meeting.model.dto.request.LoginRequest;
 import com.meeting.meeting.model.dto.request.UserRegisterRequest;
 import com.meeting.meeting.model.dto.response.BaseResponse;
 import com.meeting.meeting.model.dto.response.UserLoginResult;
+import com.meeting.meeting.repository.CorporationRepository;
 import com.meeting.meeting.repository.UserRepository;
 import com.meeting.meeting.service.UserService;
 import com.meeting.meeting.util.CacheHelper;
@@ -21,6 +23,9 @@ public class UserServiceImpl implements UserService {
     @Resource
     private UserRepository userRepository;
 
+    @Resource
+    private CorporationRepository corporationRepository;
+
     @Override
     public UserLoginResult login(LoginRequest login) {
         UserLoginResult result = new UserLoginResult();
@@ -33,9 +38,13 @@ public class UserServiceImpl implements UserService {
                 result.setStatus("200");
                 result.setMessage("登陆成功");
                 BeanUtils.copyProperties(user, result);
+                if (user.getIdentity().equals(0)) {
+                    Corporation corporation = corporationRepository.findById(user.getCorId()).orElse(null);
+                    result.setCorporation(corporation);
+                }
                 String authorization = "user" + UUID.randomUUID().toString();
                 result.setAuth(authorization);
-                CacheHelper.setData(authorization, user);
+                CacheHelper.setData(authorization, result);
             } else {
                 result.setStatus("400");
                 result.setMessage("用户名或密码错误");
