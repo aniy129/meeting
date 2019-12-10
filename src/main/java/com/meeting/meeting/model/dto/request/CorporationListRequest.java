@@ -9,4 +9,7 @@ import lombok.EqualsAndHashCode;
 public class CorporationListRequest extends Page {
     @ApiModelProperty("企业名称")
     private String name;
+
+    @ApiModelProperty("电话")
+    private String phone;
 }
