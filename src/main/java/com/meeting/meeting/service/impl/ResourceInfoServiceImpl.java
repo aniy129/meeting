@@ -11,6 +11,7 @@ import com.meeting.meeting.service.ResourceInfoService;
 import com.meeting.meeting.util.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -42,7 +43,10 @@ public class ResourceInfoServiceImpl implements ResourceInfoService {
         if (request.getType() != null) {
             query.setType(request.getType());
         }
-        Example<ResourceInfo> example = Example.of(query);
+        ExampleMatcher exampleMatcher=ExampleMatcher.matching()
+                .withMatcher("manager",ExampleMatcher.GenericPropertyMatchers.contains())
+                .withMatcher("name",ExampleMatcher.GenericPropertyMatchers.contains());
+        Example<ResourceInfo> example = Example.of(query,exampleMatcher);
         return resourceInfoRepository.findAll(example, page);
     }
 
