@@ -128,9 +128,13 @@ public class CorporationServiceImpl implements CorporationService {
         if (StringUtils.isNoneBlank(request.getPhone())) {
             query.setPhone(request.getPhone());
         }
+        if (StringUtils.isNoneBlank(request.getManager())) {
+            query.setManager(request.getManager());
+        }
         ExampleMatcher matcher = ExampleMatcher.matching()
                 .withMatcher("name", ExampleMatcher.GenericPropertyMatchers.contains())
-                .withMatcher("phone", ExampleMatcher.GenericPropertyMatchers.contains());
+                .withMatcher("phone", ExampleMatcher.GenericPropertyMatchers.contains())
+                .withMatcher("manager",ExampleMatcher.GenericPropertyMatchers.contains());
         Example<Corporation> example = Example.of(query, matcher);
         return corporationRepository.findAll(example, page);
     }

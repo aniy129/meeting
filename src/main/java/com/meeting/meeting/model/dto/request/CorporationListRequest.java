@@ -12,4 +12,7 @@ public class CorporationListRequest extends Page {
 
     @ApiModelProperty("电话")
     private String phone;
+
+    @ApiModelProperty("管理员")
+    private String manager;
 }
