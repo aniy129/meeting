@@ -24,7 +24,7 @@ public class ResourceInfoController {
     private ResourceInfoService resourceInfoService;
 
     @GetMapping("/list")
-    @ApiOperation(value = "资源类型列表")
+    @ApiOperation(value = "资源信息列表")
     public BaseResponse<Page<ResourceInfo>> resourceInfoList(@Valid ResourceInfoRequest request) {
         Page<ResourceInfo> resourceList = resourceInfoService.getResourceInfoList(request);
         return BaseResponse.success(resourceList);
