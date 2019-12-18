@@ -88,7 +88,6 @@ public class ManagerServiceImpl implements ManagerService {
         if (account != null && !account.getCode().equals(request.getCode())) {
             return BaseResponse.failure("管理员编号已存在");
         }
-        manager.setPassword(DigestUtils.md5DigestAsHex(manager.getPassword().getBytes()));
         managerRepository.save(manager);
         return BaseResponse.success(null);
     }
