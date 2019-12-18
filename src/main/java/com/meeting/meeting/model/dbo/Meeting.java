@@ -92,8 +92,8 @@ public class Meeting implements Serializable {
     /**
      * 会议结束时间，须迟于会议开始时间
      */
-    @Column(name = "endt_time")
-    private Timestamp endtTime;
+    @Column(name = "end_time")
+    private Timestamp endTime;
 
     /**
      * 会议在平台的申请时间，须早于会议开始时间
