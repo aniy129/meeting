@@ -78,7 +78,10 @@ public class ManagerServiceImpl implements ManagerService {
 
     @Override
     public BaseResponse edit(EditManagerRequest request) {
-        Manager manager = new Manager();
+        Manager manager =managerRepository.findById(request.getId()).orElse(null);
+        if (manager==null){
+            return BaseResponse.failure("主键不存在");
+        }
         BeanUtils.copyProperties(request, manager);
         Manager account = managerRepository.getManagerByAccount(request.getAccount());
         if (account != null && !account.getAccount().equals(request.getAccount())) {
