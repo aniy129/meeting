@@ -17,16 +17,17 @@ import com.meeting.meeting.repository.UserMeetingShipRepository;
 import com.meeting.meeting.service.MeetingService;
 import com.meeting.meeting.util.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,6 +45,9 @@ public class MeetingServiceImpl implements MeetingService {
 
     @Resource
     private CorporationRepository corporationRepository;
+
+    @Resource
+    private EntityManager entityManager;
 
     @Override
     public BaseResponse addMeeting(AddMeetingRequest request) {
@@ -139,27 +143,40 @@ public class MeetingServiceImpl implements MeetingService {
 
     @Override
     public BaseResponse<Page<Meeting>> listForManager(QueryMeetingRequest queryMeetingRequest) {
-        Meeting query = new Meeting();
+        String sql = "select m.*,c.name as enterprise_name from meeting m join corporation c on m.cor_id = c.id  where 1=1 ";
+        List<Object> params = new ArrayList<>();
         if (StringUtils.isNotBlank(queryMeetingRequest.getTitle())) {
-            query.setTitle(queryMeetingRequest.getTitle());
+            sql += " and m.title like ?";
+            params.add("%" + queryMeetingRequest.getTitle() + "%");
         }
         if (queryMeetingRequest.getResId() != null) {
-            query.setResId(queryMeetingRequest.getResId());
+            sql += " and m.resId = ?";
+            params.add(queryMeetingRequest.getResId());
         }
         if (StringUtils.isNotBlank(queryMeetingRequest.getSubtitle())) {
-            query.setSubtitle(queryMeetingRequest.getSubtitle());
+            sql += " and m.subtitle like ?";
+            params.add("%" + queryMeetingRequest.getSubtitle() + "%");
         }
-        PageRequest page = PageRequest.of(queryMeetingRequest.getPageIndex() - 1, queryMeetingRequest.getPageSize());
-        ExampleMatcher exampleMatcher = ExampleMatcher.matching()
-                .withMatcher("subtitle", ExampleMatcher.GenericPropertyMatchers.contains())
-                .withMatcher("title", ExampleMatcher.GenericPropertyMatchers.contains());
-        Example<Meeting> example = Example.of(query, exampleMatcher);
-        Page<Meeting> all = meetingRepository.findAll(example, page);
-        all.getContent().forEach(x -> {
+        if (StringUtils.isNotBlank(queryMeetingRequest.getEnterpriseName())) {
+            sql += " and c.name like ?";
+            params.add("%" + queryMeetingRequest.getEnterpriseName() + "%");
+        }
+        Query listQuery = entityManager.createNativeQuery(sql, Meeting.class);
+        listQuery
+                .setFirstResult((queryMeetingRequest.getPageIndex() - 1) * queryMeetingRequest.getPageSize())
+                .setMaxResults(queryMeetingRequest.getPageSize());
+        for (int i = 0; i < params.size(); i++) {
+            listQuery.setParameter(i + 1, params.get(i));
+        }
+        List<Meeting> resultList = listQuery.getResultList();
+        resultList.forEach(x -> {
             Corporation corporation = corporationRepository.getOne(x.getCorId());
-            x.setEnterPriseName(corporation.getName());
+            x.setEnterpriseName(corporation.getName());
         });
-        return BaseResponse.success(all);
+        int total = listQuery.getMaxResults();
+        PageRequest page = PageRequest.of(queryMeetingRequest.getPageIndex() - 1, queryMeetingRequest.getPageSize());
+        PageImpl resultPage = new PageImpl(resultList, page, total);
+        return BaseResponse.success(resultPage);
     }
 
     @Override

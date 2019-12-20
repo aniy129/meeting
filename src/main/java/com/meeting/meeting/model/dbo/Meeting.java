@@ -113,7 +113,7 @@ public class Meeting implements Serializable {
     @Column(name = "remark")
     private String remark;
 
-
+    @Column(name = "enterprise_name")
     @Transient
-    private String enterPriseName;
+    private String enterpriseName;
 }

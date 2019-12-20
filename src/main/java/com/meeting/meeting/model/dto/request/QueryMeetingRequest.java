@@ -8,14 +8,16 @@ import lombok.EqualsAndHashCode;
 @Data
 public class QueryMeetingRequest extends Page {
 
-    @ApiModelProperty( "会议主标题")
+    @ApiModelProperty("会议主标题")
     private String title;
 
-    @ApiModelProperty( "会议副标题")
+    @ApiModelProperty("会议副标题")
     private String subtitle;
 
-    @ApiModelProperty( "会议资源主键")
+    @ApiModelProperty("会议资源主键")
     private Integer resId;
 
+    @ApiModelProperty("企业名称")
+    private String enterpriseName;
 
 }
