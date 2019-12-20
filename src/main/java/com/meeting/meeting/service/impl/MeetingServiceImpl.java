@@ -161,6 +161,7 @@ public class MeetingServiceImpl implements MeetingService {
         }
         meeting.setCost(request.getCost());
         meeting.setAudit(request.getAudit());
+        meeting.setRemark(request.getRemark());
         meetingRepository.save(meeting);
         return BaseResponse.success(null);
     }

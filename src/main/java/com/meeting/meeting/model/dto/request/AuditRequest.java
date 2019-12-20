@@ -21,4 +21,6 @@ public class AuditRequest {
     @Range(min = 1, max = 2, message = "审核驻状态不正确")
     @ApiModelProperty("1-审核通过，2-审核未通过")
     private Integer audit;
+    @ApiModelProperty("备注")
+    private String remark;
 }

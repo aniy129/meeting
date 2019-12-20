@@ -106,4 +106,10 @@ public class Meeting implements Serializable {
      */
     @Column(name = "cost")
     private BigDecimal cost;
+
+    /**
+     * 备注
+     */
+    @Column(name = "remark")
+    private String remark;
 }
