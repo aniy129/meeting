@@ -1,6 +1,7 @@
 package com.meeting.meeting.service.impl;
 
 import com.meeting.meeting.model.common.UserContext;
+import com.meeting.meeting.model.dbo.Corporation;
 import com.meeting.meeting.model.dbo.Meeting;
 import com.meeting.meeting.model.dbo.ResourceInfo;
 import com.meeting.meeting.model.dbo.UserMeetingShip;
@@ -9,6 +10,7 @@ import com.meeting.meeting.model.dto.request.AuditRequest;
 import com.meeting.meeting.model.dto.request.QueryMeetingRequest;
 import com.meeting.meeting.model.dto.response.BaseResponse;
 import com.meeting.meeting.model.dto.response.UserLoginResult;
+import com.meeting.meeting.repository.CorporationRepository;
 import com.meeting.meeting.repository.MeetingRepository;
 import com.meeting.meeting.repository.ResourceInfoRepository;
 import com.meeting.meeting.repository.UserMeetingShipRepository;
@@ -39,6 +41,9 @@ public class MeetingServiceImpl implements MeetingService {
 
     @Resource
     private ResourceInfoRepository resourceInfoRepository;
+
+    @Resource
+    private CorporationRepository corporationRepository;
 
     @Override
     public BaseResponse addMeeting(AddMeetingRequest request) {
@@ -150,6 +155,10 @@ public class MeetingServiceImpl implements MeetingService {
                 .withMatcher("title", ExampleMatcher.GenericPropertyMatchers.contains());
         Example<Meeting> example = Example.of(query, exampleMatcher);
         Page<Meeting> all = meetingRepository.findAll(example, page);
+        all.getContent().forEach(x -> {
+            Corporation corporation = corporationRepository.getOne(x.getCorId());
+            x.setEnterPriseName(corporation.getName());
+        });
         return BaseResponse.success(all);
     }
 

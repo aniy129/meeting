@@ -112,4 +112,8 @@ public class Meeting implements Serializable {
      */
     @Column(name = "remark")
     private String remark;
+
+
+    @Transient
+    private String enterPriseName;
 }
