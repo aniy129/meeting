@@ -26,7 +26,7 @@ public class ManagerMeetingController {
         return meetingService.listForManager(queryMeetingRequest);
     }
 
-    @PostMapping("/list")
+    @PostMapping("/audit")
     @ApiOperation("审核会议")
     public BaseResponse audit(@RequestBody @Valid AuditRequest request) {
         return meetingService.audit(request);
