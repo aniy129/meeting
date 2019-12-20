@@ -2,6 +2,7 @@ package com.meeting.meeting.service.impl;
 
 import com.meeting.meeting.model.common.UserContext;
 import com.meeting.meeting.model.dbo.Meeting;
+import com.meeting.meeting.model.dbo.ResourceInfo;
 import com.meeting.meeting.model.dbo.UserMeetingShip;
 import com.meeting.meeting.model.dto.request.AddMeetingRequest;
 import com.meeting.meeting.model.dto.request.AuditRequest;
@@ -9,6 +10,7 @@ import com.meeting.meeting.model.dto.request.QueryMeetingRequest;
 import com.meeting.meeting.model.dto.response.BaseResponse;
 import com.meeting.meeting.model.dto.response.UserLoginResult;
 import com.meeting.meeting.repository.MeetingRepository;
+import com.meeting.meeting.repository.ResourceInfoRepository;
 import com.meeting.meeting.repository.UserMeetingShipRepository;
 import com.meeting.meeting.service.MeetingService;
 import com.meeting.meeting.util.StringUtils;
@@ -20,6 +22,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
@@ -32,6 +36,9 @@ public class MeetingServiceImpl implements MeetingService {
 
     @Resource
     private UserMeetingShipRepository userMeetingShipRepository;
+
+    @Resource
+    private ResourceInfoRepository resourceInfoRepository;
 
     @Override
     public BaseResponse addMeeting(AddMeetingRequest request) {
@@ -57,7 +64,12 @@ public class MeetingServiceImpl implements MeetingService {
         if (!user.getIdentity().equals(0) || user.getCorporation() == null || user.getCorporation().getId() == null) {
             return BaseResponse.failure("当前企业不存在，请使用企业身份重新登陆");
         }
+        ResourceInfo resourceInfo = resourceInfoRepository.findById(request.getResId()).orElse(null);
+        if (resourceInfo == null) {
+            return BaseResponse.failure("资源不存在");
+        }
         meeting.setCorId(user.getCorporation().getId());
+        meeting.setCost(resourceInfo.getCost().multiply(new BigDecimal(days)));
         meeting = meetingRepository.saveAndFlush(meeting);
         UserMeetingShip ship = new UserMeetingShip();
         ship.setUseId(user.getId());
