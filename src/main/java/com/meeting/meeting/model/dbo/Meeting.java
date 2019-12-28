@@ -1,18 +1,21 @@
-package  com.meeting.meeting.model.dbo;
+package com.meeting.meeting.model.dbo;
 
 import lombok.Data;
+
 import javax.persistence.*;
 import java.sql.Timestamp;
 import java.math.BigDecimal;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
-* @author jie
-* @date 2019-11-03
-*/
+ * @author jie
+ * @date 2019-11-03
+ */
 @Entity
 @Data
-@Table(name="meeting")
+@Table(name = "meeting")
 public class Meeting implements Serializable {
 
     /**
@@ -24,12 +27,6 @@ public class Meeting implements Serializable {
     private Integer id;
 
     /**
-     * 资源主键，自增
-     */
-    @Column(name = "res_id")
-    private Integer resId;
-
-    /**
      * 主键，自增
      */
     @Column(name = "cor_id")
@@ -38,7 +35,7 @@ public class Meeting implements Serializable {
     /**
      * 会议主标题
      */
-    @Column(name = "title",nullable = false)
+    @Column(name = "title", nullable = false)
     private String title;
 
     /**
@@ -74,13 +71,13 @@ public class Meeting implements Serializable {
     /**
      * 0-待审核，1-审核通过，2-审核未通过
      */
-    @Column(name = "audit",nullable = false)
+    @Column(name = "audit", nullable = false)
     private Integer audit;
 
     /**
      * 0-待举办，1-举办中，2-已结束
      */
-    @Column(name = "state",nullable = false)
+    @Column(name = "state", nullable = false)
     private Integer state;
 
     /**
@@ -116,4 +113,6 @@ public class Meeting implements Serializable {
     @Column(name = "enterprise_name")
     @Transient
     private String enterpriseName;
+    @Transient
+    private List<ResourceInfo> resourceInfos = new ArrayList<>();
 }
