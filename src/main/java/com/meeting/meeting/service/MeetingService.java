@@ -6,6 +6,8 @@ import com.meeting.meeting.model.dto.response.BaseResponse;
 import com.meeting.meeting.model.dto.response.UserInfoResponse;
 import org.springframework.data.domain.Page;
 
+import javax.mail.MessagingException;
+
 public interface MeetingService {
     BaseResponse addMeeting(AddMeetingRequest request, Integer meetingId);
 
@@ -26,4 +28,6 @@ public interface MeetingService {
     BaseResponse cancel(TakePartInRequest request);
 
     BaseResponse<Page<UserInfoResponse>> getMeetingUserInfos(MeetingUsersRequest request);
+
+    void sendHtmlMail(String to, String subject, String content) throws MessagingException;
 }

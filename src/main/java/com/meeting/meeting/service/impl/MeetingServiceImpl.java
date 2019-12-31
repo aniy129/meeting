@@ -10,16 +10,23 @@ import com.meeting.meeting.repository.*;
 import com.meeting.meeting.service.MeetingService;
 import com.meeting.meeting.util.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.data.domain.Page;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -45,6 +52,15 @@ public class MeetingServiceImpl implements MeetingService {
 
     @Resource
     private MeetingResourceShipRepository meetingResourceShipRepository;
+
+    @Resource
+    private UserRepository userRepository;
+
+    @Resource
+    private JavaMailSender mailSender;
+
+    @Value("${spring.mail.username}")
+    private String from;
 
     @Override
     @Transactional
@@ -208,6 +224,7 @@ public class MeetingServiceImpl implements MeetingService {
         int total = listQuery.getMaxResults();
         PageRequest page = PageRequest.of(queryMeetingRequest.getPageIndex() - 1, queryMeetingRequest.getPageSize());
         List<Meeting> meetingList = getMeetings(listQuery);
+        meetingList.forEach(x -> x.setResourceInfos(resourceInfoRepository.getResourcesByMeetingId(x.getId())));
         PageImpl resultPage = new PageImpl(meetingList, page, total);
         return BaseResponse.success(resultPage);
     }
@@ -321,7 +338,7 @@ public class MeetingServiceImpl implements MeetingService {
         if (!user.getIdentity().equals(0) || user.getCorporation() == null || user.getCorporation().getId() == null) {
             return BaseResponse.failure("当前企业不存在，请使用企业身份重新登陆");
         }
-        String sql = "select u.* from meeting m  join user_meeting_ship ship on ship.id=m.id join user u on ship.use_id = u.id where u.identity=1 and m.id=" + request.getMeetingId();
+        String sql = String.format("select u.* from meeting m  join user_meeting_ship ship on ship.id=m.id join user u on ship.use_id = u.id where u.identity=1 and m.id=%s", request.getMeetingId());
         Query listQuery = entityManager.createNativeQuery(sql, User.class);
         listQuery
                 .setFirstResult((request.getPageIndex() - 1) * request.getPageSize())
@@ -337,5 +354,57 @@ public class MeetingServiceImpl implements MeetingService {
         PageRequest page = PageRequest.of(request.getPageIndex() - 1, request.getPageSize());
         PageImpl resultPage = new PageImpl(result, page, total);
         return BaseResponse.success(resultPage);
+    }
+
+    @Override
+    public void sendHtmlMail(String to, String subject, String content) throws MessagingException {
+        MimeMessage message = mailSender.createMimeMessage();
+        //true 表⽰示需要创建⼀一个 multipart message
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+        helper.setFrom(from);
+        helper.setTo(to);
+        helper.setSubject(subject);
+        helper.setText(content, true);
+        mailSender.send(message);
+    }
+
+    //会议开始前设置资源状态为占用，给参与会议的人发送邮件通知
+    @Scheduled(cron = "0 0/1 * * * ? ")
+    public void startMeeting() {
+        List<Meeting> list = meetingRepository.getMeetingsForStarting();
+        list.forEach(meet -> {
+            List<ResourceInfo> resourceInfos = resourceInfoRepository.getResourcesByMeetingId(meet.getId());
+            for (ResourceInfo resourceInfo : resourceInfos) {
+                resourceInfo.setState(0);
+                resourceInfoRepository.save(resourceInfo);
+            }
+            List<User> users = userRepository.getUsersByMeetingId(meet.getId());
+            users.forEach(u -> {
+                String subject = String.format("邀请您于%s参加%s会议", meet.getStartTime(), meet.getIntro());
+                String content = "<html><body>" + subject + "</body></html>";
+                try {
+                    sendHtmlMail(u.getEmail(), subject, content);
+                    System.out.println("成功了");
+                } catch (MessagingException e) {
+                    System.out.println("失败了");
+                    e.printStackTrace();
+                }
+            });
+        });
+    }
+
+    /**
+     * 会议结束后将资源设置为空闲
+     */
+    @Scheduled(cron = "0 0/1 * * * ? ")
+    public void endMeeting() {
+        List<Meeting> list = meetingRepository.getMeetingsForEnd();
+        list.forEach(meet -> {
+            List<ResourceInfo> resourceInfos = resourceInfoRepository.getResourcesByMeetingId(meet.getId());
+            for (ResourceInfo resourceInfo : resourceInfos) {
+                resourceInfo.setState(1);
+                resourceInfoRepository.save(resourceInfo);
+            }
+        });
     }
 }
