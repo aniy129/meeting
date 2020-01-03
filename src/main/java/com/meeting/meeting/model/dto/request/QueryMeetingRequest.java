@@ -14,9 +14,6 @@ public class QueryMeetingRequest extends Page {
     @ApiModelProperty("会议副标题")
     private String subtitle;
 
-    @ApiModelProperty("会议资源主键")
-    private Integer resId;
-
     @ApiModelProperty("企业名称")
     private String enterpriseName;
 

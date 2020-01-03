@@ -2,8 +2,11 @@ package com.meeting.meeting.controller.api.user;
 
 import com.meeting.meeting.model.dbo.Meeting;
 import com.meeting.meeting.model.dto.request.AddMeetingRequest;
+import com.meeting.meeting.model.dto.request.EditMeetingRequest;
+import com.meeting.meeting.model.dto.request.MeetingUsersRequest;
 import com.meeting.meeting.model.dto.request.QueryMeetingRequest;
 import com.meeting.meeting.model.dto.response.BaseResponse;
+import com.meeting.meeting.model.dto.response.UserInfoResponse;
 import com.meeting.meeting.service.MeetingService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -24,7 +27,13 @@ public class EnterpriseMeetingController {
     @PostMapping("/add")
     @ApiOperation("申请会议")
     public BaseResponse addMeeting(@RequestBody @Valid AddMeetingRequest request) {
-        return meetingService.addMeeting(request);
+        return meetingService.addMeeting(request, null);
+    }
+
+    @PostMapping("/edit")
+    @ApiOperation("修改会议")
+    public BaseResponse editMeeting(@RequestBody @Valid EditMeetingRequest request) {
+        return meetingService.editMeeting(request);
     }
 
     @GetMapping("/list")
@@ -35,8 +44,13 @@ public class EnterpriseMeetingController {
 
     @GetMapping("/get")
     @ApiOperation("获取会议")
-    public BaseResponse<Meeting>get(Integer id){
+    public BaseResponse<Meeting> get(Integer id) {
         return meetingService.get(id);
     }
 
+    @GetMapping("/getMeetingUserInfos")
+    @ApiOperation("获取参与会议的用户信息")
+    public BaseResponse<Page<UserInfoResponse>> getMeetingUserInfos(@Valid MeetingUsersRequest request) {
+        return meetingService.getMeetingUserInfos(request);
+    }
 }
