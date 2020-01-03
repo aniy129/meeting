@@ -66,8 +66,9 @@ public class MeetingServiceImpl implements MeetingService {
     @Transactional
     public BaseResponse addMeeting(AddMeetingRequest request, Integer meetingId) {
         for (Integer resourceId : request.getResId()) {
-            if (isExistMeeting(request.getStartTime(), request.getEndTime(), resourceId, null)) {
-                return BaseResponse.failure("当前会议时间与系统已存在的会议时间冲突");
+            Meeting existMeeting = isExistMeeting(request.getStartTime(), request.getEndTime(), resourceId, null);
+            if (existMeeting != null) {
+                return BaseResponse.failure("当前会议时间与系统已存在的会议【" + existMeeting.getTitle() + "】时间冲突");
             }
         }
         BaseResponse x = addAndEditMeeting(request, meetingId);
@@ -132,8 +133,9 @@ public class MeetingServiceImpl implements MeetingService {
     @Transactional
     public BaseResponse editMeeting(EditMeetingRequest request) {
         for (Integer resourceId : request.getResId()) {
-            if (isExistMeeting(request.getStartTime(), request.getEndTime(), resourceId, request.getId())) {
-                return BaseResponse.failure("当前会议时间与系统已存在的会议时间冲突");
+            Meeting existMeeting = isExistMeeting(request.getStartTime(), request.getEndTime(), resourceId, request.getId());
+            if (existMeeting != null) {
+                return BaseResponse.failure("当前会议时间与系统已存在的会议【" + existMeeting.getTitle() + "】时间冲突");
             }
         }
         MeetingResourceShip query = new MeetingResourceShip();
@@ -147,10 +149,10 @@ public class MeetingServiceImpl implements MeetingService {
         return BaseResponse.success(null);
     }
 
-    private boolean isExistMeeting(Timestamp start, Timestamp end, Integer resourceId, Integer id) {
+    private Meeting isExistMeeting(Timestamp start, Timestamp end, Integer resourceId, Integer id) {
         List<Meeting> list = meetingRepository.getMeetingsByResourceInfosId(resourceId);
         if (list.isEmpty()) {
-            return false;
+            return null;
         } else {
             List<Meeting> collect = list.stream().filter(meeting ->
                     (start.getTime() >= meeting.getStartTime().getTime() && start.getTime() <= meeting.getEndTime().getTime())
@@ -158,9 +160,13 @@ public class MeetingServiceImpl implements MeetingService {
                             || (start.getTime() <= meeting.getStartTime().getTime() && end.getTime() >= meeting.getEndTime().getTime())
             ).collect(Collectors.toList());
             if (id == null) {
-                return collect.size() > 0;
+                if (collect.isEmpty()) {
+                    return null;
+                } else {
+                    return collect.get(0);
+                }
             } else {
-                return collect.stream().anyMatch(meeting -> !meeting.getId().equals(id));
+                return collect.stream().filter(meeting -> !meeting.getId().equals(id)).findFirst().orElse(null);
             }
         }
     }
