@@ -19,4 +19,6 @@ public interface ManagerService {
     BaseResponse edit(EditManagerRequest request);
 
     BaseResponse<Manager> get(Integer id);
+
+    BaseResponse resetPassword(Integer id);
 }

@@ -78,8 +78,8 @@ public class ManagerServiceImpl implements ManagerService {
 
     @Override
     public BaseResponse edit(EditManagerRequest request) {
-        Manager manager =managerRepository.findById(request.getId()).orElse(null);
-        if (manager==null){
+        Manager manager = managerRepository.findById(request.getId()).orElse(null);
+        if (manager == null) {
             return BaseResponse.failure("主键不存在");
         }
         BeanUtils.copyProperties(request, manager);
@@ -103,5 +103,16 @@ public class ManagerServiceImpl implements ManagerService {
         }
         manager.setPassword(null);
         return BaseResponse.success(manager);
+    }
+
+    @Override
+    public BaseResponse resetPassword(Integer id) {
+        Manager manager = managerRepository.findById(id).orElse(null);
+        if (manager == null) {
+            return BaseResponse.failure("管理员编号不存在");
+        }
+        manager.setPassword("123456");
+        managerRepository.save(manager);
+        return BaseResponse.success(null);
     }
 }

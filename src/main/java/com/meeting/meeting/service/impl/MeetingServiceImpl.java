@@ -24,6 +24,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import javax.persistence.TemporalType;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -66,9 +67,9 @@ public class MeetingServiceImpl implements MeetingService {
     @Transactional
     public BaseResponse addMeeting(AddMeetingRequest request, Integer meetingId) {
         for (Integer resourceId : request.getResId()) {
-            Meeting existMeeting = isExistMeeting(request.getStartTime(), request.getEndTime(), resourceId, null);
-            if (existMeeting != null) {
-                return BaseResponse.failure("当前会议时间与系统已存在的会议【" + existMeeting.getTitle() + "】时间冲突");
+            ResourceInfo resourceInfo = isExistMeeting(request.getStartTime(), request.getEndTime(), resourceId, null);
+            if (resourceInfo != null) {
+                return BaseResponse.failure(resourceInfo.getName() + "已参与其他会议！");
             }
         }
         BaseResponse x = addAndEditMeeting(request, meetingId);
@@ -133,9 +134,9 @@ public class MeetingServiceImpl implements MeetingService {
     @Transactional
     public BaseResponse editMeeting(EditMeetingRequest request) {
         for (Integer resourceId : request.getResId()) {
-            Meeting existMeeting = isExistMeeting(request.getStartTime(), request.getEndTime(), resourceId, request.getId());
-            if (existMeeting != null) {
-                return BaseResponse.failure("当前会议时间与系统已存在的会议【" + existMeeting.getTitle() + "】时间冲突");
+            ResourceInfo resourceInfo = isExistMeeting(request.getStartTime(), request.getEndTime(), resourceId, request.getId());
+            if (resourceInfo != null) {
+                return BaseResponse.failure(resourceInfo.getName() + "已参与其他会议！");
             }
         }
         MeetingResourceShip query = new MeetingResourceShip();
@@ -149,26 +150,32 @@ public class MeetingServiceImpl implements MeetingService {
         return BaseResponse.success(null);
     }
 
-    private Meeting isExistMeeting(Timestamp start, Timestamp end, Integer resourceId, Integer id) {
-        List<Meeting> list = meetingRepository.getMeetingsByResourceInfosId(resourceId);
-        if (list.isEmpty()) {
-            return null;
-        } else {
-            List<Meeting> collect = list.stream().filter(meeting ->
-                    (start.getTime() >= meeting.getStartTime().getTime() && start.getTime() <= meeting.getEndTime().getTime())
-                            || (end.getTime() >= meeting.getStartTime().getTime() && end.getTime() <= meeting.getEndTime().getTime())
-                            || (start.getTime() <= meeting.getStartTime().getTime() && end.getTime() >= meeting.getEndTime().getTime())
-            ).collect(Collectors.toList());
-            if (id == null) {
-                if (collect.isEmpty()) {
-                    return null;
-                } else {
-                    return collect.get(0);
-                }
-            } else {
-                return collect.stream().filter(meeting -> !meeting.getId().equals(id)).findFirst().orElse(null);
-            }
+    private ResourceInfo isExistMeeting(Timestamp start, Timestamp end, Integer resourceId, Integer id) {
+        String sql = String.format("select r.*\n" +
+                "from resource_info r\n" +
+                "         join meeting_resource_ship ship on r.id = ship.resource_id\n" +
+                "         join meeting m on ship.meeting_id = m.id\n" +
+                "where ((m.start_time <= ? and m.end_time >= ?)\n" +
+                "   or (m.end_time >= ? and m.start_time <= ?)\n" +
+                "   or (m.start_time <= ? and m.end_time >= ?))\n");
+        if (id != null) {
+            sql += "and r.id<>?";
         }
+        Query countQuery = entityManager.createNativeQuery(sql, ResourceInfo.class);
+        countQuery.setParameter(1, start, TemporalType.TIMESTAMP);
+        countQuery.setParameter(2, start, TemporalType.TIMESTAMP);
+        countQuery.setParameter(3, end, TemporalType.TIMESTAMP);
+        countQuery.setParameter(4, end, TemporalType.TIMESTAMP);
+        countQuery.setParameter(5, start, TemporalType.TIMESTAMP);
+        countQuery.setParameter(6, end, TemporalType.TIMESTAMP);
+        if (id != null) {
+            countQuery.setParameter(7, id);
+        }
+        List<ResourceInfo> resultList = countQuery.getResultList();
+        if (resultList != null && !resultList.isEmpty()) {
+            return resultList.get(0);
+        }
+        return null;
     }
 
     @Override
@@ -278,8 +285,14 @@ public class MeetingServiceImpl implements MeetingService {
         if (!user.getIdentity().equals(1)) {
             return BaseResponse.failure("请使用用户身份登录");
         }
-        String sql = "select m.* from meeting m join corporation c on m.cor_id = c.id and m.audit=1 left join user_meeting_ship ship on ship.id=m.id where 1=1 ";
+        String sql = "select m.* from meeting m join corporation c on m.cor_id = c.id and m.audit=1 ";
         List<Object> params = new ArrayList<>();
+        if (request.getIsTakePartIn() != null && request.getIsTakePartIn()) {
+            sql += " left join user_meeting_ship ship on ship.id=m.id where ship.use_id=? ";
+            params.add(user.getId());
+        } else {
+            sql += " where 1=1 ";
+        }
         if (StringUtils.isNotBlank(request.getSubtitle())) {
             sql += " and m.subtitle like ?";
             params.add("%" + request.getSubtitle() + "%");
@@ -292,16 +305,23 @@ public class MeetingServiceImpl implements MeetingService {
             sql += " and c.name like ?";
             params.add("%" + request.getEnterpriseName() + "%");
         }
-        if (request.getIsTakePartIn() != null && request.getIsTakePartIn()) {
-            sql += " and ship.use_id=?";
-            params.add(user.getId());
-        }
         Query listQuery = createQuery(sql, request.getPageIndex(), request.getPageSize(), params);
         PageRequest page = PageRequest.of(request.getPageIndex() - 1, request.getPageSize());
         int total = listQuery.getMaxResults();
         List<Meeting> meetingList = getMeetings(listQuery);
+        meetingList.forEach(x -> {
+            x.setIsTakePartIn(isTakePartIn(x.getId(), user.getId()));
+        });
         PageImpl resultPage = new PageImpl(meetingList, page, total);
         return BaseResponse.success(resultPage);
+    }
+
+    private Boolean isTakePartIn(Integer meetId, Integer userId) {
+        String sql = String.format("select count(1) from meeting m join user_meeting_ship ship on m.id = ship.id where ship.use_id=? and ship.id=?");
+        Query nativeQuery = entityManager.createNativeQuery(sql, Integer.class);
+        nativeQuery.setParameter(1, userId);
+        nativeQuery.setParameter(2, meetId);
+        return Integer.parseInt(nativeQuery.getSingleResult().toString()) > 0;
     }
 
     @Override
@@ -379,6 +399,8 @@ public class MeetingServiceImpl implements MeetingService {
     public void startMeeting() {
         List<Meeting> list = meetingRepository.getMeetingsForStarting();
         list.forEach(meet -> {
+            meet.setState(1);
+            meetingRepository.save(meet);
             List<ResourceInfo> resourceInfos = resourceInfoRepository.getResourcesByMeetingId(meet.getId());
             for (ResourceInfo resourceInfo : resourceInfos) {
                 resourceInfo.setState(0);
@@ -406,11 +428,27 @@ public class MeetingServiceImpl implements MeetingService {
     public void endMeeting() {
         List<Meeting> list = meetingRepository.getMeetingsForEnd();
         list.forEach(meet -> {
+            meet.setState(2);
+            meetingRepository.save(meet);
             List<ResourceInfo> resourceInfos = resourceInfoRepository.getResourcesByMeetingId(meet.getId());
             for (ResourceInfo resourceInfo : resourceInfos) {
-                resourceInfo.setState(1);
+                resourceInfo.setState(2);
                 resourceInfoRepository.save(resourceInfo);
             }
         });
+    }
+
+    @Override
+    public BaseResponse<Page<ResourceInfo>> resourceInfos(MeetingUsersRequest request) {
+        String sql = String.format("select r.* from resource_info r join meeting_resource_ship ship on r.id = ship.resource_id where ship.meeting_id=?=%s", request.getMeetingId());
+        Query listQuery = entityManager.createNativeQuery(sql, ResourceInfo.class);
+        listQuery
+                .setFirstResult((request.getPageIndex() - 1) * request.getPageSize())
+                .setMaxResults(request.getPageSize());
+        int total = listQuery.getMaxResults();
+        List<ResourceInfo> list = listQuery.getResultList();
+        PageRequest page = PageRequest.of(request.getPageIndex() - 1, request.getPageSize());
+        PageImpl resultPage = new PageImpl(list, page, total);
+        return BaseResponse.success(resultPage);
     }
 }

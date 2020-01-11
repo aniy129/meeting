@@ -22,13 +22,14 @@ public interface MeetingRepository extends JpaRepository<Meeting, Integer>, JpaS
             "from meeting m\n" +
             "where m.audit = 1\n" +
             "  and m.start_time < now()\n" +
-            "  and m.start_time > date_add(now(), interval -3 month)", nativeQuery = true)
+            "  and m.start_time > date_add(now(), interval -3 month)" +
+            " and m.state=0", nativeQuery = true)
     List<Meeting> getMeetingsForStarting();
 
     @Query(value = "select m.*\n" +
             "from meeting m\n" +
             "where m.audit = 1\n" +
             "  and m.end_time < now()\n" +
-            "  and m.state = 0", nativeQuery = true)
+            "  and m.state = 1", nativeQuery = true)
     List<Meeting> getMeetingsForEnd();
 }

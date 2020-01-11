@@ -1,6 +1,7 @@
 package com.meeting.meeting.service;
 
 import com.meeting.meeting.model.dbo.Meeting;
+import com.meeting.meeting.model.dbo.ResourceInfo;
 import com.meeting.meeting.model.dto.request.*;
 import com.meeting.meeting.model.dto.response.BaseResponse;
 import com.meeting.meeting.model.dto.response.UserInfoResponse;
@@ -30,4 +31,6 @@ public interface MeetingService {
     BaseResponse<Page<UserInfoResponse>> getMeetingUserInfos(MeetingUsersRequest request);
 
     void sendHtmlMail(String to, String subject, String content) throws MessagingException;
+
+    BaseResponse<Page<ResourceInfo>> resourceInfos(MeetingUsersRequest request);
 }

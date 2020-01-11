@@ -45,4 +45,10 @@ public class ManagerController {
     public BaseResponse<Manager> get(Integer id) {
         return managerService.get(id);
     }
+
+    @GetMapping("/resetPassword")
+    @ApiOperation(value = "重置密码")
+    public BaseResponse resetPassword(Integer id) {
+        return managerService.resetPassword(id);
+    }
 }

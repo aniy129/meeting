@@ -1,5 +1,6 @@
 package com.meeting.meeting.model.dbo;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -115,4 +116,7 @@ public class Meeting implements Serializable {
     private String enterpriseName;
     @Transient
     private List<ResourceInfo> resourceInfos = new ArrayList<>();
+    @ApiModelProperty(name = "用户是否参与此次会议")
+    @Transient
+    private Boolean isTakePartIn;
 }

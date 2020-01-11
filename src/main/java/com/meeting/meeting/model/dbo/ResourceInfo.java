@@ -41,7 +41,7 @@ public class ResourceInfo implements Serializable {
     private String name;
 
     /**
-     * 0-占用中,不可用，1-空闲中,可用
+     * 0-待举办，1-举办中，2-已结束
      */
     @Column(name = "state",nullable = false)
     private Integer state;

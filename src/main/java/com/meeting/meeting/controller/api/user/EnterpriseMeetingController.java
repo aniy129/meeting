@@ -1,6 +1,7 @@
 package com.meeting.meeting.controller.api.user;
 
 import com.meeting.meeting.model.dbo.Meeting;
+import com.meeting.meeting.model.dbo.ResourceInfo;
 import com.meeting.meeting.model.dto.request.AddMeetingRequest;
 import com.meeting.meeting.model.dto.request.EditMeetingRequest;
 import com.meeting.meeting.model.dto.request.MeetingUsersRequest;
@@ -50,7 +51,13 @@ public class EnterpriseMeetingController {
 
     @GetMapping("/getMeetingUserInfos")
     @ApiOperation("获取参与会议的用户信息")
-    public BaseResponse<Page<UserInfoResponse>> getMeetingUserInfos(@Valid MeetingUsersRequest request) {
+    public BaseResponse<Page<UserInfoResponse>> getMeetingUserInfos(@Valid @RequestBody MeetingUsersRequest request) {
         return meetingService.getMeetingUserInfos(request);
+    }
+
+    @GetMapping("/resourceInfos")
+    @ApiOperation("获取会议的资源信息")
+    public BaseResponse<Page<ResourceInfo>> resourceInfos(@Valid @RequestBody MeetingUsersRequest request) {
+        return meetingService.resourceInfos(request);
     }
 }

@@ -1,9 +1,12 @@
 package com.meeting.meeting.controller.api.manager;
 
 import com.meeting.meeting.model.dbo.Resource;
+import com.meeting.meeting.model.dbo.ResourceInfo;
 import com.meeting.meeting.model.dto.request.EditResourceRequest;
+import com.meeting.meeting.model.dto.request.MeetingUsersRequest;
 import com.meeting.meeting.model.dto.request.ResourceRequest;
 import com.meeting.meeting.model.dto.response.BaseResponse;
+import com.meeting.meeting.service.MeetingService;
 import com.meeting.meeting.service.ResourceService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -21,6 +24,9 @@ public class MeetingResourceController {
 
     @javax.annotation.Resource
     private ResourceService resourceService;
+
+    @javax.annotation.Resource
+    private MeetingService meetingService;
 
     @GetMapping("/resourceList")
     @ApiOperation(value = "资源类型列表")
@@ -56,5 +62,11 @@ public class MeetingResourceController {
     public BaseResponse<Resource> getResource(Integer id) {
         Resource resource = resourceService.getResource(id);
         return BaseResponse.success(resource);
+    }
+
+    @GetMapping("/resourceInfos")
+    @ApiOperation("获取会议的资源信息")
+    public BaseResponse<Page<ResourceInfo>> resourceInfos(@Valid @RequestBody MeetingUsersRequest request) {
+        return meetingService.resourceInfos(request);
     }
 }
