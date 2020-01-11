@@ -17,4 +17,6 @@ public class QueryMeetingRequest extends Page {
     @ApiModelProperty("企业名称")
     private String enterpriseName;
 
+    @ApiModelProperty("企业id")
+    private Integer enterpriseId;
 }

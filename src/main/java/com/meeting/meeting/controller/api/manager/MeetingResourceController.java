@@ -25,9 +25,6 @@ public class MeetingResourceController {
     @javax.annotation.Resource
     private ResourceService resourceService;
 
-    @javax.annotation.Resource
-    private MeetingService meetingService;
-
     @GetMapping("/resourceList")
     @ApiOperation(value = "资源类型列表")
     @ApiImplicitParams({
@@ -64,9 +61,4 @@ public class MeetingResourceController {
         return BaseResponse.success(resource);
     }
 
-    @GetMapping("/resourceInfos")
-    @ApiOperation("获取会议的资源信息")
-    public BaseResponse<Page<ResourceInfo>> resourceInfos(@Valid @RequestBody MeetingUsersRequest request) {
-        return meetingService.resourceInfos(request);
-    }
 }

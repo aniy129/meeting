@@ -233,6 +233,10 @@ public class MeetingServiceImpl implements MeetingService {
             sql += " and c.name like ?";
             params.add("%" + queryMeetingRequest.getEnterpriseName() + "%");
         }
+        if (queryMeetingRequest.getEnterpriseId() != null) {
+            sql += " and c.id = ?";
+            params.add(queryMeetingRequest.getEnterpriseId());
+        }
         Query listQuery = createQuery(sql, queryMeetingRequest.getPageIndex(), queryMeetingRequest.getPageSize(), params);
         int total = listQuery.getMaxResults();
         PageRequest page = PageRequest.of(queryMeetingRequest.getPageIndex() - 1, queryMeetingRequest.getPageSize());

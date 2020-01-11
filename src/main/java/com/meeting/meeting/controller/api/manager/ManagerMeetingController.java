@@ -1,7 +1,9 @@
 package com.meeting.meeting.controller.api.manager;
 
 import com.meeting.meeting.model.dbo.Meeting;
+import com.meeting.meeting.model.dbo.ResourceInfo;
 import com.meeting.meeting.model.dto.request.AuditRequest;
+import com.meeting.meeting.model.dto.request.MeetingUsersRequest;
 import com.meeting.meeting.model.dto.request.QueryMeetingRequest;
 import com.meeting.meeting.model.dto.response.BaseResponse;
 import com.meeting.meeting.service.MeetingService;
@@ -30,5 +32,11 @@ public class ManagerMeetingController {
     @ApiOperation("审核会议")
     public BaseResponse audit(@RequestBody @Valid AuditRequest request) {
         return meetingService.audit(request);
+    }
+
+    @GetMapping("/resourceInfos")
+    @ApiOperation("获取会议的资源信息")
+    public BaseResponse<Page<ResourceInfo>> resourceInfos(@Valid @RequestBody MeetingUsersRequest request) {
+        return meetingService.resourceInfos(request);
     }
 }
