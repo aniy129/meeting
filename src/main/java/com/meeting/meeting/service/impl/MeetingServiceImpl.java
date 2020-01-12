@@ -133,16 +133,16 @@ public class MeetingServiceImpl implements MeetingService {
     @Override
     @Transactional
     public BaseResponse editMeeting(EditMeetingRequest request) {
-        for (Integer resourceId : request.getResId()) {
-            ResourceInfo resourceInfo = isExistMeeting(request.getStartTime(), request.getEndTime(), resourceId, request.getId());
-            if (resourceInfo != null) {
-                return BaseResponse.failure(resourceInfo.getName() + "已参与其他会议！");
-            }
-        }
         MeetingResourceShip query = new MeetingResourceShip();
         query.setMeetingId(request.getId());
         List<MeetingResourceShip> all = meetingResourceShipRepository.findAll(Example.of(query));
         meetingResourceShipRepository.deleteAll(all);
+        for (Integer resourceId : request.getResId()) {
+            ResourceInfo resourceInfo = isExistMeeting(request.getStartTime(), request.getEndTime(), resourceId, null);
+            if (resourceInfo != null) {
+                return BaseResponse.failure(resourceInfo.getName() + "已参与其他会议！");
+            }
+        }
         BaseResponse x = addAndEditMeeting(request, request.getId());
         if (x != null) {
             return x;
@@ -155,22 +155,20 @@ public class MeetingServiceImpl implements MeetingService {
                 "from resource_info r\n" +
                 "         join meeting_resource_ship ship on r.id = ship.resource_id\n" +
                 "         join meeting m on ship.meeting_id = m.id\n" +
-                "where ((m.start_time <= ? and m.end_time >= ?)\n" +
+                "where and r.id=? and ((m.start_time <= ? and m.end_time >= ?)\n" +
                 "   or (m.end_time >= ? and m.start_time <= ?)\n" +
                 "   or (m.start_time <= ? and m.end_time >= ?))\n");
-        if (id != null) {
-            sql += "and r.id<>?";
-        }
         Query countQuery = entityManager.createNativeQuery(sql, ResourceInfo.class);
-        countQuery.setParameter(1, start, TemporalType.TIMESTAMP);
+        countQuery.setParameter(1,resourceId);
         countQuery.setParameter(2, start, TemporalType.TIMESTAMP);
-        countQuery.setParameter(3, end, TemporalType.TIMESTAMP);
+        countQuery.setParameter(3, start, TemporalType.TIMESTAMP);
         countQuery.setParameter(4, end, TemporalType.TIMESTAMP);
-        countQuery.setParameter(5, start, TemporalType.TIMESTAMP);
-        countQuery.setParameter(6, end, TemporalType.TIMESTAMP);
-        if (id != null) {
-            countQuery.setParameter(7, id);
-        }
+        countQuery.setParameter(5, end, TemporalType.TIMESTAMP);
+        countQuery.setParameter(6, start, TemporalType.TIMESTAMP);
+        countQuery.setParameter(7, end, TemporalType.TIMESTAMP);
+//        if (id != null) {
+//            countQuery.setParameter(7, id);
+//        }
         List<ResourceInfo> resultList = countQuery.getResultList();
         if (resultList != null && !resultList.isEmpty()) {
             return resultList.get(0);
