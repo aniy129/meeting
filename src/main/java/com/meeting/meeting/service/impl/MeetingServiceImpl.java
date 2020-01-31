@@ -320,10 +320,11 @@ public class MeetingServiceImpl implements MeetingService {
 
     private Boolean isTakePartIn(Integer meetId, Integer userId) {
         String sql = String.format("select count(1) from meeting m join user_meeting_ship ship on m.id = ship.id where ship.use_id=? and ship.id=?");
-        Query nativeQuery = entityManager.createNativeQuery(sql, Integer.class);
+        Query nativeQuery = entityManager.createNativeQuery(sql);
         nativeQuery.setParameter(1, userId);
         nativeQuery.setParameter(2, meetId);
-        return Integer.parseInt(nativeQuery.getSingleResult().toString()) > 0;
+        Object r = nativeQuery.getSingleResult();
+        return r != null && Integer.parseInt(r.toString()) > 0;
     }
 
     @Override
