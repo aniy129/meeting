@@ -12,8 +12,9 @@ import java.io.Serializable;
 @Data
 @Table(name="manager")
 public class Manager implements Serializable {
+	private static final long serialVersionUID = 2131032209961439398L;
 
-    /**
+	/**
      * 主键，自增
      */
     @Id

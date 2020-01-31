@@ -111,7 +111,7 @@ public class ManagerServiceImpl implements ManagerService {
         if (manager == null) {
             return BaseResponse.failure("管理员编号不存在");
         }
-        manager.setPassword("123456");
+        manager.setPassword(DigestUtils.md5DigestAsHex("123456".getBytes()));
         managerRepository.save(manager);
         return BaseResponse.success(null);
     }
