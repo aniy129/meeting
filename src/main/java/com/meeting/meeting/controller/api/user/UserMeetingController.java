@@ -23,7 +23,7 @@ public class UserMeetingController {
 
     @GetMapping("/list")
     @ApiOperation(value = "查看可参与的会议")
-    public BaseResponse<Page<Meeting>> list(@Valid @RequestBody UserQueryMeetingRequest request) {
+    public BaseResponse<Page<Meeting>> list(@Valid UserQueryMeetingRequest request) {
         return meetingService.listForUser(request);
     }
 
