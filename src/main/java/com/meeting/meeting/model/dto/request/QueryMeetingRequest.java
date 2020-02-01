@@ -19,4 +19,7 @@ public class QueryMeetingRequest extends Page {
 
     @ApiModelProperty("企业id")
     private Integer enterpriseId;
+
+    @ApiModelProperty("会议状态：0-待举办，1-举办中，2-已结束")
+    private Integer state;
 }

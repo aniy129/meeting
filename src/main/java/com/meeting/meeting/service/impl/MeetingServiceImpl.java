@@ -307,6 +307,10 @@ public class MeetingServiceImpl implements MeetingService {
             sql += " and c.name like ?";
             params.add("%" + request.getEnterpriseName() + "%");
         }
+        if (request.getState() != null) {
+        	sql += " AND m.state=?";
+        	params.add(request.getState());
+        }
         Query listQuery = createQuery(sql, request.getPageIndex(), request.getPageSize(), params);
         PageRequest page = PageRequest.of(request.getPageIndex() - 1, request.getPageSize());
         int total = listQuery.getMaxResults();
