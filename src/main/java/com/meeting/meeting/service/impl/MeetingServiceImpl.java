@@ -151,15 +151,15 @@ public class MeetingServiceImpl implements MeetingService {
     }
 
     private ResourceInfo isExistMeeting(Timestamp start, Timestamp end, Integer resourceId, Integer id) {
-        String sql = String.format("select r.*\n" +
-                "from resource_info r\n" +
-                "         join meeting_resource_ship ship on r.id = ship.resource_id\n" +
-                "         join meeting m on ship.meeting_id = m.id\n" +
-                "where and r.id=? and ((m.start_time <= ? and m.end_time >= ?)\n" +
-                "   or (m.end_time >= ? and m.start_time <= ?)\n" +
-                "   or (m.start_time <= ? and m.end_time >= ?))\n");
+        String sql = String.format("SELECT r.*\n" +
+                "FROM resource_info r\n" +
+                "         JOIN meeting_resource_ship ship ON r.id = ship.resource_id\n" +
+                "         JOIN meeting m ON ship.meeting_id = m.id\n" +
+                "WHERE r.id=? AND ((m.start_time <= ? AND m.end_time >= ?)\n" +
+                "   OR (m.end_time >= ? AND m.start_time <= ?)\n" +
+                "   OR (m.start_time <= ? AND m.end_time >= ?))\n");
         Query countQuery = entityManager.createNativeQuery(sql, ResourceInfo.class);
-        countQuery.setParameter(1,resourceId);
+        countQuery.setParameter(1, resourceId);
         countQuery.setParameter(2, start, TemporalType.TIMESTAMP);
         countQuery.setParameter(3, start, TemporalType.TIMESTAMP);
         countQuery.setParameter(4, end, TemporalType.TIMESTAMP);
