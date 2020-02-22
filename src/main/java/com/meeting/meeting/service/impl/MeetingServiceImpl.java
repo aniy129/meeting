@@ -217,7 +217,11 @@ public class MeetingServiceImpl implements MeetingService {
 
     @Override
     public BaseResponse<Page<Meeting>> listForManager(QueryMeetingRequest queryMeetingRequest) {
-        String sql = String.format("select m.*,c.name as enterprise_name from meeting m join corporation c on m.cor_id = c.id  where 1=1 ");
+    	String from = " FROM meeting m"
+        		+ " JOIN corporation c ON m.cor_id = c.id"
+        		+ " WHERE 1 = 1 ";
+        String sqlCount = "SELECT COUNT(*) " + from;	//查总数
+        String sql = "SELECT m.*, c.name AS enterprise_name " + from;
         List<Object> params = new ArrayList<>();
         if (StringUtils.isNotBlank(queryMeetingRequest.getTitle())) {
             sql += " and m.title like ?";
@@ -235,12 +239,17 @@ public class MeetingServiceImpl implements MeetingService {
             sql += " and c.id = ?";
             params.add(queryMeetingRequest.getEnterpriseId());
         }
+        Query q = entityManager.createNativeQuery(sqlCount);
+        Integer total = Integer.valueOf(q.getSingleResult().toString());
+        if (total == null || total <= 0)
+        	return BaseResponse.success(null);
+
         Query listQuery = createQuery(sql, queryMeetingRequest.getPageIndex(), queryMeetingRequest.getPageSize(), params);
-        int total = listQuery.getMaxResults();
+//        int total = listQuery.getMaxResults();
         PageRequest page = PageRequest.of(queryMeetingRequest.getPageIndex() - 1, queryMeetingRequest.getPageSize());
         List<Meeting> meetingList = getMeetings(listQuery);
         meetingList.forEach(x -> x.setResourceInfos(resourceInfoRepository.getResourcesByMeetingId(x.getId())));
-        PageImpl resultPage = new PageImpl(meetingList, page, total);
+        PageImpl<Meeting> resultPage = new PageImpl<Meeting>(meetingList, page, total);
         return BaseResponse.success(resultPage);
     }
 
