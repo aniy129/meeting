@@ -3,6 +3,7 @@ package com.meeting.meeting.service.impl;
 
 import com.meeting.meeting.model.common.UserContext;
 import com.meeting.meeting.model.dbo.Corporation;
+import com.meeting.meeting.model.dbo.Meeting;
 import com.meeting.meeting.model.dbo.User;
 import com.meeting.meeting.model.dto.request.CorporationListRequest;
 import com.meeting.meeting.model.dto.request.EditCorporationRequest;
@@ -11,6 +12,7 @@ import com.meeting.meeting.model.dto.request.ManagerEditCorporationRequest;
 import com.meeting.meeting.model.dto.response.BaseResponse;
 import com.meeting.meeting.model.dto.response.UserLoginResult;
 import com.meeting.meeting.repository.CorporationRepository;
+import com.meeting.meeting.repository.MeetingRepository;
 import com.meeting.meeting.repository.UserRepository;
 import com.meeting.meeting.service.CorporationService;
 import com.meeting.meeting.util.StringUtils;
@@ -44,6 +46,8 @@ public class CorporationServiceImpl implements CorporationService {
 
     @Resource
     private UserRepository userRepository;
+    @Resource
+    private MeetingRepository meetingRepository;
 
     @Override
     public Corporation findById(Integer id) {
@@ -74,6 +78,9 @@ public class CorporationServiceImpl implements CorporationService {
     @Transactional(rollbackFor = Exception.class)
     public void delete(Integer id) {
         corporationRepository.deleteById(id);
+        Meeting mt = new Meeting();
+        mt.setCorId(id);
+        meetingRepository.delete(mt);	//删除企业下的会议
     }
 
     @Override

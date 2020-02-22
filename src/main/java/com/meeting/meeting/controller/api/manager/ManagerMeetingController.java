@@ -24,7 +24,7 @@ public class ManagerMeetingController {
 
     @GetMapping("/list")
     @ApiOperation("申请列表")
-    public BaseResponse<Page<Meeting>> list(QueryMeetingRequest queryMeetingRequest) {
+    public BaseResponse<Page<Meeting>> list(@Valid QueryMeetingRequest queryMeetingRequest) {
         return meetingService.listForManager(queryMeetingRequest);
     }
 
