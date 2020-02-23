@@ -1,5 +1,15 @@
 package com.meeting.meeting.controller.api.user;
 
+import javax.annotation.Resource;
+import javax.validation.Valid;
+
+import org.springframework.data.domain.Page;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.meeting.meeting.model.dbo.Meeting;
 import com.meeting.meeting.model.dbo.ResourceInfo;
 import com.meeting.meeting.model.dto.request.AddMeetingRequest;
@@ -9,13 +19,9 @@ import com.meeting.meeting.model.dto.request.QueryMeetingRequest;
 import com.meeting.meeting.model.dto.response.BaseResponse;
 import com.meeting.meeting.model.dto.response.UserInfoResponse;
 import com.meeting.meeting.service.MeetingService;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.data.domain.Page;
-import org.springframework.web.bind.annotation.*;
-
-import javax.annotation.Resource;
-import javax.validation.Valid;
 
 @RestController
 @Api(tags = "会议控制器(企业端)")
@@ -51,13 +57,13 @@ public class EnterpriseMeetingController {
 
     @GetMapping("/getMeetingUserInfos")
     @ApiOperation("获取参与会议的用户信息")
-    public BaseResponse<Page<UserInfoResponse>> getMeetingUserInfos(@Valid @RequestBody MeetingUsersRequest request) {
+    public BaseResponse<Page<UserInfoResponse>> getMeetingUserInfos(@Valid MeetingUsersRequest request) {
         return meetingService.getMeetingUserInfos(request);
     }
 
     @GetMapping("/resourceInfos")
     @ApiOperation("获取会议的资源信息")
-    public BaseResponse<Page<ResourceInfo>> resourceInfos(@Valid @RequestBody MeetingUsersRequest request) {
+    public BaseResponse<Page<ResourceInfo>> resourceInfos(@Valid MeetingUsersRequest request) {
         return meetingService.resourceInfos(request);
     }
 }
